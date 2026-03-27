@@ -1,249 +1,211 @@
 <?php
 session_start();
-// In real project: include 'db_connect.php'; or similar
-// For now dummy version - no DB needed for display
+include 'config.php'; 
+
+// Fetch all stories from the database
+$sql = "SELECT * FROM stories ORDER BY created_at DESC";
+$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Stories & Transformations | Beautify Home Services</title>
+    <title>Customer Stories | Beautify Luxe</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="./css/style.css">  
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+
+    
     <style>
         :root {
             --accent-gold: #c5a059;
-            --soft-gray: #f9f9f9;
-            --dark-text: #2c2c2c;
+            --bg-silk: #fdfbf7;
+            --glass-white: rgba(255, 255, 255, 0.85);
+            --text-main: #333;
         }
+
+        body {
+            background-color: var(--bg-silk);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+        }
+
         .story-header {
-            padding: 80px 0;
-            background: linear-gradient(to bottom, #fffcf5, #ffffff);
-            text-align: center;
+            padding: 100px 0 60px;
+            background: radial-gradient(circle at top right, #fff5e6, transparent);
         }
-        .section-tag {
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 0.9rem;
-            font-weight: 700;
+
+        .story-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: #1a1a1a;
         }
+
+        /* Modern Card Styling */
         .story-card {
-            border: none;
-            margin-bottom: 40px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .story-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        }
-        .image-wrapper {
+            background: var(--glass-white);
+            border-radius: 20px;
             overflow: hidden;
-            border-radius: 12px;
-            position: relative;
+            border: 1px solid rgba(197, 160, 89, 0.1);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
         }
+
+        .story-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.08);
+            border-color: var(--accent-gold);
+        }
+
+        .image-container {
+            position: relative;
+            height: 380px;
+            overflow: hidden;
+        }
+
         .story-img {
             width: 100%;
-            height: 420px;
+            height: 100%;
             object-fit: cover;
-            transition: transform 0.6s ease;
+            transition: transform 0.8s ease;
         }
+
         .story-card:hover .story-img {
-            transform: scale(1.08);
+            transform: scale(1.1);
         }
-        .story-overlay {
+
+        .category-badge {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 25px 20px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.75));
-            color: white;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .story-card:hover .story-overlay {
-            opacity: 1;
-        }
-        .story-info {
-            padding: 15px 0 0;
-        }
-        .service-name {
-            font-weight: 700;
-            font-size: 1.25rem;
-            margin-bottom: 6px;
-            color: var(--dark-text);
-        }
-        .ba-section {
-            background-color: var(--soft-gray);
-            padding: 80px 0;
-            border-radius: 40px;
-            margin: 60px 0;
-        }
-        .ba-card {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.06);
-        }
-        .ba-image-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-        }
-        .ba-image-group > div {
-            flex: 1 1 45%;
-            min-width: 280px;
-            position: relative;
-        }
-        .ba-image-group img {
-            width: 100%;
-            height: 340px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .ba-label {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
+            top: 20px;
+            left: 20px;
             background: var(--accent-gold);
             color: white;
-            padding: 6px 14px;
-            font-size: 0.85rem;
+            padding: 5px 15px;
             border-radius: 50px;
+            font-size: 0.75rem;
             font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        @media (max-width: 768px) {
-            .story-img { height: 360px; }
-            .ba-image-group img { height: 280px; }
+
+        .story-body {
+            padding: 25px;
+            text-align: center;
         }
+
+        .service-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .testimonial-text {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.6;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .client-meta {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-gold);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .btn-book {
+            background: var(--accent-gold);
+            color: white;
+            border-radius: 50px;
+            padding: 12px 35px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-book:hover {
+            background: #b38e4a;
+            color: white;
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        }
+
+        /* Masonry-like spacing */
+        .card-columns {
+            column-count: 3;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 992px) { .card-columns { column-count: 2; } }
+        @media (max-width: 576px) { .card-columns { column-count: 1; } }
     </style>
 </head>
 <body>
+
 <?php include('navbar.php'); ?>
 
-<div class="story-header">
+<header class="story-header text-center">
     <div class="container">
-        <span class="section-tag">Visual Lookbook</span>
-        <h1 class="display-4 font-weight-bold mt-3">Beautify Stories</h1>
-        <p class="lead text-muted mt-3">Real transformations — delivered right at your doorstep.</p>
+        <span class="section-tag" style="color: var(--accent-gold); font-weight: 700; letter-spacing: 4px;">TESTIMONIALS</span>
+        <h1 class="mt-2">Beauty Unveiled</h1>
+        <p class="text-muted">Explore the confidence and elegance our clients found at home.</p>
     </div>
-</div>
+</header>
 
-<div class="container">
-    <div class="row">
-        <!-- Story 1: Bridal Makeup -->
-        <div class="col-md-4">
+<main class="container mb-5">
+    <div class="card-columns">
+        <?php 
+        if ($result && $result->num_rows > 0): 
+            while($row = $result->fetch_assoc()): 
+        ?>
             <div class="story-card">
-                <div class="image-wrapper">
-                    <img src="https://images.squarespace-cdn.com/content/v1/5e575ffdabec06285101e4d6/1745812770874-BP4P7BR68IY51RD8A375/sri-lankan-wedding-bride-dreamy-portrait-vibiana" 
-                         class="story-img" alt="Bridal Makeup Transformation">
-                    <div class="story-overlay">
-                        <p>"I looked like royalty without stepping out!"</p>
-                    </div>
+                <div class="image-container">
+                    <img src="images/<?php echo htmlspecialchars($row['image_url']); ?>" 
+                         class="story-img" 
+                         alt="Beautify Transformation">
+                    <span class="category-badge">Client Story</span>
                 </div>
-                <div class="story-info">
-                    <div class="service-name">Bridal Makeup</div>
-                    <p class="text-muted small"><i class="fas fa-user-circle mr-1"></i> Ayesha K. • Faisalabad</p>
+                
+                <div class="story-body">
+                    <h3 class="service-title"><?php echo htmlspecialchars($row['title']); ?></h3>
+                    <p class="testimonial-text">
+                        "<?php echo htmlspecialchars($row['content']); ?>"
+                    </p>
+                    <div class="client-meta">
+                        <i class="far fa-heart"></i>
+                        <span>Verified Transformation</span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Story 2: Party / Glam Makeup -->
-        <div class="col-md-4">
-            <div class="story-card">
-                <div class="image-wrapper">
-                    <img src="https://elements.togetherjournal.com/uploads/2024/07/f18c4254-tanesha-vinay-weddingday_high-097-1024x683.jpg" 
-                         class="story-img" alt="Glam Party Makeup">
-                    <div class="story-overlay">
-                        <p>"Glowed up for the big night!"</p>
-                    </div>
-                </div>
-                <div class="story-info">
-                    <div class="service-name">Glam Party Makeup</div>
-                    <p class="text-muted small"><i class="fas fa-user-circle mr-1"></i> Fatima S. • Lahore</p>
-                </div>
+        <?php 
+            endwhile; 
+        else: 
+        ?>
+            <div class="text-center w-100 py-5">
+                <img src="https://cdn-icons-png.flaticon.com/512/13515/13515364.png" width="80" class="mb-3 opacity-50">
+                <p class="text-muted">Our gallery is currently being updated with fresh looks.</p>
             </div>
-        </div>
-
-        <!-- Story 3: Hair Styling -->
-        <div class="col-md-4">
-            <div class="story-card">
-                <div class="image-wrapper">
-                    <img src="https://images.squarespace-cdn.com/content/v1/6390d1213656941a08dc0d71/1670435105471-007P1ECH5314CWR4XOJF/Signature+Blowout+%234.jpg" 
-                         class="story-img" alt="Bridal Hair Styling">
-                    <div class="story-overlay">
-                        <p>"Wedding-ready in just 90 minutes at home."</p>
-                    </div>
-                </div>
-                <div class="story-info">
-                    <div class="service-name">Bridal Hairstyle</div>
-                    <p class="text-muted small"><i class="fas fa-user-circle mr-1"></i> Noor J. • Islamabad</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<section class="container ba-section">
-    <div class="text-center mb-5">
-        <span class="section-tag">Real Results</span>
-        <h2 class="font-weight-bold">Client Transformations</h2>
-    </div>
-    
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="ba-card">
-                <div class="ba-image-group">
-                    <div>
-                        <img src="https://drchernoff.com/wp-content/uploads/2024/07/DaxxifyWS5-1024x604.jpg" alt="Before Facial">
-                        <span class="ba-label">Before</span>
-                    </div>
-                    <div>
-                        <img src="https://drchernoff.com/wp-content/uploads/2025/05/16-1-1024x651.jpg" alt="After HydraFacial">
-                        <span class="ba-label">After HydraFacial</span>
-                    </div>
-                </div>
-                <div class="text-center mt-4">
-                    <h4>Hydra-Radiance Facial</h4>
-                    <p class="text-muted px-3">Deep cleansing + hydration for that instant dewy glow — perfect before any event.</p>
-                </div>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-10">
-            <div class="ba-card">
-                <div class="ba-image-group">
-                    <div>
-                        <img src="https://c1.wallpaperflare.com/preview/567/48/7/596ed4055267a.jpg" alt="Before Nail Service">
-                        <span class="ba-label">Before</span>
-                    </div>
-                    <div>
-                        <img src="https://images.pexels.com/photos/973405/pexels-photo-973405.jpeg" alt="After Signature Mani Pedi">
-                        <span class="ba-label">After Signature Mani-Pedi</span>
-                    </div>
-                </div>
-                <div class="text-center mt-4">
-                    <h4>Signature Manicure + Pedicure</h4>
-                    <p class="text-muted px-3">Nail shaping, cuticle care, polish & luxury massage — pampering at home.</p>
-                </div>
-            </div>
-        </div>
+    <div class="text-center mt-5 py-5">
+        <h2 class="font-weight-bold mb-4" style="font-family: 'Playfair Display';">Inspired by these results?</h2>
+        <a href="booking.php" class="btn btn-book btn-lg">Reserve Your Session</a>
     </div>
-</section>
+</main>
 
-<div class="container text-center mb-5">
-    <h3 class="mb-4">Ready to Write Your Own Story?</h3>
-    <a href="index.php#services" class="btn btn-lg px-5" style="background: var(--accent-gold); color: white; border-radius: 50px;">Book Now</a>
-</div>
-
-<footer class="py-5 border-top text-center text-muted small">
-    <p>© <?php echo date("Y"); ?> Beautify Home Beauty Services – Professional & Hygienic At-Home Care</p>
+<footer class="py-4 text-center border-top">
+    <p class="small text-muted mb-0">© <?php echo date("Y"); ?> Beautify Home Services. Elegance Delivered.</p>
 </footer>
 
 </body>

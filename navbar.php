@@ -14,6 +14,7 @@
                 echo '<li class="nav-item"><a class="nav-link" href="stories.php">Stories</a></li>';
                 echo '<li class="nav-item"><a class="nav-link" href="contact_us.php">Contact Us</a></li>';
                 echo '<li class="nav-item"><a class="nav-link" href="faqs.php">FAQS</a></li>';
+                echo '<li class="nav-item"><a class="nav-link" href="about.php">About</a></li>';
                 echo '<li class="nav-item"><a class="nav-link" href="register.php">Register</a></li>';
                 echo '<li class="nav-item"><a class="nav-link" href="login.php">Login</a></li>';
                 echo '<li class="nav-item"><a class="nav-link" href="./admin/admin_login.php">Admin Login</a></li>';

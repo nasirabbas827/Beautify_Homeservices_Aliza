@@ -1,6 +1,10 @@
 <?php
 session_start();
 include('config.php');
+
+// Fetch FAQs from database
+$sql = "SELECT * FROM faqs ORDER BY created_at DESC";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -8,45 +12,77 @@ include('config.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequently Asked Questions | Beautify Services</title>
+    <title>Frequently Asked Questions | Beautify Luxe</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="./css/style.css">  
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
 
     <style>
         :root {
             --accent-gold: #c5a059;
             --dark-navy: #002d5b;
-            --light-bg: #f8f9fa;
+            --bg-silk: #fdfbf7;
+            --glass-white: rgba(255, 255, 255, 0.9);
         }
 
+        body {
+            background-color: var(--bg-silk);
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
 
         .faq-header {
-            background-color: var(--dark-navy);
+            background: linear-gradient(135deg, var(--dark-navy) 0%, #001a35 100%);
             color: white;
-            padding: 80px 0;
+            padding: 100px 0 80px;
             text-align: center;
+            border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px;
         }
 
-        .faq-container { margin-top: -40px; margin-bottom: 80px; }
+        .faq-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 30px auto 0;
+            position: relative;
+        }
+
+        .search-box input {
+            height: 60px;
+            border-radius: 30px;
+            padding-left: 30px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            font-size: 1rem;
+        }
+
+        .faq-container { margin-top: -50px; margin-bottom: 80px; }
 
         .faq-card {
-            background: white;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            padding: 30px;
+            background: var(--glass-white);
+            border: 1px solid rgba(197, 160, 89, 0.1);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            padding: 40px;
+            backdrop-filter: blur(10px);
         }
 
-        /* Accordion Styling */
+        /* Modern Accordion */
         .accordion .card {
             border: none;
-            border-bottom: 1px solid #eee !important;
-            border-radius: 0 !important;
+            background: transparent;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.05) !important;
         }
 
         .accordion .card-header {
-            background: white;
+            background: transparent;
             border: none;
             padding: 20px 0;
         }
@@ -60,32 +96,62 @@ include('config.php');
             align-items: center;
             width: 100%;
             padding: 0;
+            font-size: 1.1rem;
+            text-align: left;
+            transition: 0.3s;
         }
 
-        .btn-link:hover, .btn-link:focus { color: var(--accent-gold); }
+        .btn-link:hover { color: var(--accent-gold); }
+
+        .btn-link i {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+            color: var(--accent-gold);
+        }
+
+        .btn-link:not(.collapsed) i {
+            transform: rotate(180deg);
+        }
+
+        .card-body {
+            padding: 0 0 25px;
+            line-height: 1.7;
+            color: #666;
+        }
 
         .faq-category-title {
             color: var(--accent-gold);
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.9rem;
-            margin-top: 40px;
-            margin-bottom: 20px;
+            letter-spacing: 3px;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
         }
 
-        .search-box {
-            max-width: 600px;
-            margin: 20px auto 0;
-            position: relative;
+        .faq-category-title::after {
+            content: "";
+            height: 1px;
+            flex-grow: 1;
+            background: rgba(197, 160, 89, 0.2);
+            margin-left: 20px;
         }
 
-        .search-box input {
-            height: 50px;
-            border-radius: 25px;
-            padding-left: 25px;
+        .contact-support-btn {
+            background: var(--accent-gold);
+            color: white;
+            border-radius: 50px;
+            padding: 12px 40px;
+            font-weight: 600;
+            transition: 0.3s;
             border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .contact-support-btn:hover {
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+            color: white;
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -93,109 +159,82 @@ include('config.php');
 
 <?php include('navbar.php'); ?>
 
-<div class="faq-header">
+<header class="faq-header">
     <div class="container">
-        <h1 class="font-weight-bold text-white">How can we help?</h1>
-        <p>Everything you need to know about our services and booking process.</p>
+        <h1 class="text-white">Concierge Support</h1>
+        <p class="opacity-75">Your questions about our at-home luxury services, answered.</p>
         <div class="search-box">
-            <input type="text" class="form-control" placeholder="Search for a question...">
+            <input type="text" id="faqSearch" class="form-control" placeholder="Search for a topic (e.g. 'Safety', 'Payment')...">
         </div>
     </div>
-</div>
+</header>
 
 <div class="container faq-container">
     <div class="row justify-content-center">
-        <div class="col-md-9">
+        <div class="col-md-10 col-lg-8">
             <div class="faq-card">
                 
-                <div class="faq-category-title">General Information</div>
-                <div class="accordion" id="generalFaq">
-                    <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne">
-                                What is Beautify Services?
-                                <i class="fas fa-chevron-down fa-xs"></i>
-                            </button>
-                        </div>
-                        <div id="collapseOne" class="collapse show" data-parent="#generalFaq">
-                            <div class="card-body text-muted">
-                                Beautify Services is a professional home-service platform that connects verified professionals (Salon, Wellness, and Counseling) with clients in the comfort of their homes.
+                <div class="faq-category-title">General Questions</div>
+                
+                <div class="accordion" id="dynamicFaq">
+                    <?php 
+                    if ($result && $result->num_rows > 0): 
+                        $count = 0;
+                        while($row = $result->fetch_assoc()): 
+                            $count++;
+                            $collapseId = "collapse" . $row['faq_id'];
+                            $headingId = "heading" . $row['faq_id'];
+                    ?>
+                        <div class="card faq-item">
+                            <div class="card-header" id="<?php echo $headingId; ?>">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#<?php echo $collapseId; ?>">
+                                    <?php echo htmlspecialchars($row['question']); ?>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div id="<?php echo $collapseId; ?>" class="collapse" data-parent="#dynamicFaq">
+                                <div class="card-body">
+                                    <?php echo nl2br(htmlspecialchars($row['answer'])); ?>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="faq-category-title">Bookings & Payments</div>
-                <div class="accordion" id="bookingFaq">
-                    <div class="card">
-                        <div class="card-header" id="headingTwo">
-                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo">
-                                How do I book a service?
-                                <i class="fas fa-chevron-down fa-xs"></i>
-                            </button>
+                    <?php 
+                        endwhile; 
+                    else: 
+                    ?>
+                        <div class="text-center py-5">
+                            <i class="fas fa-question-circle fa-3x mb-3 text-muted"></i>
+                            <p class="text-muted">We're updating our FAQ list. Please check back later.</p>
                         </div>
-                        <div id="collapseTwo" class="collapse" data-parent="#bookingFaq">
-                            <div class="card-body text-muted">
-                                Simply browse our categories, select your desired services, choose a convenient date and time, and confirm your booking. You will receive an SMS and email confirmation once a professional is assigned.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header" id="headingThree">
-                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree">
-                                What payment methods do you accept?
-                                <i class="fas fa-chevron-down fa-xs"></i>
-                            </button>
-                        </div>
-                        <div id="collapseThree" class="collapse" data-parent="#bookingFaq">
-                            <div class="card-body text-muted">
-                                We accept Cash on Delivery (COD), Credit/Debit Cards, EasyPaisa, and JazzCash. You can select your preferred method during checkout.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="faq-category-title">Safety & Privacy</div>
-                <div class="accordion" id="safetyFaq">
-                    <div class="card">
-                        <div class="card-header" id="headingFour">
-                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour">
-                                Are your professionals verified?
-                                <i class="fas fa-chevron-down fa-xs"></i>
-                            </button>
-                        </div>
-                        <div id="collapseFour" class="collapse" data-parent="#safetyFaq">
-                            <div class="card-body text-muted">
-                                Absolutely. Every service provider on Beautify Services undergoes a strict background check, CNIC verification, and practical skill testing before joining our platform.
-                            </div>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
             </div>
 
             <div class="text-center mt-5">
-                <p class="text-muted">Didn't find your answer?</p>
-                <a href="contact_us.php" class="btn btn-outline-dark" style="border-radius: 50px; padding: 10px 30px;">Contact Support</a>
+                <p class="text-muted">Still have questions?</p>
+                <a href="contact_us.php" class="btn contact-support-btn">Talk to a Specialist</a>
             </div>
         </div>
     </div>
 </div>
 
-<footer class="py-5 border-top text-center text-muted small">
-    <p>© <?php echo date("Y"); ?> Beautify Home Beauty Services – Professional & Hygienic At-Home Care</p>
+<footer class="py-5 text-center text-muted small">
+    <p>© <?php echo date("Y"); ?> Beautify Luxe – Premium At-Home Care</p>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Simple script to toggle chevron icons
-    $('.collapse').on('shown.bs.collapse', function(){
-        $(this).parent().find(".fa-chevron-down").removeClass("fa-chevron-down").addClass("fa-chevron-up");
-    }).on('hidden.bs.collapse', function(){
-        $(this).parent().find(".fa-chevron-up").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+    // Real-time Search Filter
+    $(document).ready(function(){
+        $("#faqSearch").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $(".faq-item").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
     });
 </script>
 
